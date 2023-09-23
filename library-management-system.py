@@ -1,4 +1,4 @@
-import time
+# Added a datetime module
 import datetime
 
 # A list to store books
@@ -7,56 +7,127 @@ booksList = []
 # Added a dictionary to store borrowers
 borrowList = {}
 
-# User prompt to input number, returns an integer and prints an error message if the input is not a number
+# User prompt to input number, returns the integer
+# or the value entered and prints an error message if the input
+# is not a number.
 def inputNumber():
-    num = input()
+    Num = input()
     while not num.isdigit():
         print("Invalid input. Please enter a number.")
         num = input()
-    return int(num)
 
-    
+# Asks user for a string which can be a
+# member name or a book name
+def inputString():
+    return input()
+
 
 class Book:
-    def __init__(self, title, author, pubYear):
+    # Changed pubYear to pubDate
+    def __init__(self, title, author, pubDate):
         self.title = title
         self.author = author
-        self.pubYear = pubYear
+        self.pubDate = pubDate
+        # added a borrower and due date attribute and initialising them to None.
         self.borrower = None
-        
-    def borrow(self, borrower):
-        if self.borrower:
-            print("Book is already borrowed!")
-            return
-        self.borrower = borrower
-        print(f"{borrower.name} borrowed {self.title} on {datetime.datetime.now()}")
+        self.dueDate = None
+    
+    def __str__(self):
+        return "Title:" f"{self.title} by {self.author} (Published in {self.pubYear})"
+
+    def isBorrowed(self):
+        return self.borrower is not None
+    
+    def setDueDate(self, dueDate):
+        self.dueDate = dueDate
+
+
+class Member:
+    def __init__(self, name):
+        self.name = name
+        self.borrowedBooks = []
 
     def __str__(self):
-        return f"{self.title} by {self.author} (Published in {self.pubYear})"
+        return "Name: " f"{self.name}, Books borrowed: {self.borrowedBooks}"
+    
+    def addBook(self, book):
+        self.borrowedBooks.append(book)
+
+class Library:
+    def __init__(self):
+        self.books = []
+        self.membersList = []
+
+    def addMember(self, name):
+        if self.checkMember(name) == False:
+            self.membersList.append(Member(name))
+        else:
+            print("Member already exists")
+
+    # Call this function to check if a member exists
+    # Returns false if the member is not in the 
+    # membersList and true if otherwise
+    def checkMember(self, name):
+        exists = False
+        for mem in self.membersList:
+            if mem.name == name:
+                exists = True
+                return exists
+            return exists
+
+    def checkBook(self, book):
+        exists = False
+        for bk in self.books:
+            if bk.title == book:
+                exists = True
+                return exists
+            return exists
+
+    def removeMember(self, name):
+        if self.checkMember(name) == True:
+
+            for mem in self.membersList:
+                if mem.name == name:
+                    if len(mem.borrowedBooks) > 0:
+                        print("Member has borrowed books. Cannot remove member")
+                        return
+                    self.membersList.remove(mem)
+                    print("Member removed: " + mem.__str__())
+                    return
+        else:
+            print("Member does not exist")
 
 # changed the name of the function to addBook from add_book
-def addBook():
-    title = input("Enter the book title: ")
-    author = input("Enter the author's name: ")
-    pubYear = input("Enter the publication year: ")
-    # changed the name of the variable to newBook from new_book
-    newBook = Book(title, author, pubYear)
-    booksList.append(newBook)
-    print(f"Book {title} added!")
+    def addBook():
+        title = input("Enter the book title: ")
+        author = input("Enter the author's name: ")
+        pubYear = input("Enter the publication year: ")
+        # changed the name of the variable to newBook from new_book
+        newBook = Book(title, author, pubYear)
+        booksList.append(newBook)
+        print(f"Book {title} added!")
 
-def removeBook():
-    title = input("Enter the title of the book to remove: ")
-    # changed the name of the variable to bookFound from book_found
-    bookFound = False
-    for index, book in enumerate(booksList):
-        if book.title == title:
-            del booksList[index]
-            print(f"Book {title} removed!")
-            bookFound = True
-            break
-    if not bookFound:
-        print("Book not found!")
+    def removeBook():
+        title = input("Enter the title of the book to remove: ")
+        # changed the name of the variable to bookFound from book_found
+        bookFound = False
+        for index, book in enumerate(booksList):
+            if book.title == title:
+                del booksList[index]
+                print(f"Book {title} removed!")
+                bookFound = True
+                break
+        if not bookFound:
+            print("Book not found!")
 
+    def borrowBook(self, book, member):
+        if self.checkBook(book) == False:
+            print("Book does not exist")
+            return
+        elif self.checkMember(member) == False:
+            print("Member does no exist")
+            return
+        
 def listAllBooks():
     for book in booksList:
         print(book)
@@ -85,6 +156,8 @@ def updateBook():
             print(f"Book {title} updated!")
             return
     print("Book not found!")
+
+# add date of book info when updated or was last updated
 
 class Member:
     def __init__(self, name, age, address, phone, email):
