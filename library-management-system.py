@@ -1,20 +1,16 @@
-# Added a datetime module
+# Added a datetime modulebookslist
 import datetime
 
-# A list to store books
-# changed the name of the list too booksList from Books_List
-booksList = []
-# Added a dictionary to store borrowers
-borrowList = {}
 
 # User prompt to input number, returns the integer
 # or the value entered and prints an error message if the input
 # is not a number.
 def inputNumber():
     Num = input()
-    while not num.isdigit():
+    while not Num.isdigit():
         print("Invalid input. Please enter a number.")
-        num = input()
+        Num = input()
+    return int(Num)
 
 # Asks user for a string which can be a
 # member name or a book name
@@ -33,7 +29,7 @@ class Book:
         self.dueDate = None
     
     def __str__(self):
-        return "Title:" f"{self.title} by {self.author} (Published in {self.pubYear})"
+        return "Title:" f"{self.title} by {self.author} (Published in {self.pubDate})"
 
     def isBorrowed(self):
         return self.borrower is not None
@@ -48,14 +44,21 @@ class Member:
         self.borrowedBooks = []
 
     def __str__(self):
-        return "Name: " f"{self.name}, Books borrowed: {self.borrowedBooks}"
+        booksCombined = []
+        for i in self.borrowedBooks:
+            booksCombined.append(i.__str__())
+        
+        return "Name: " f"{self.name}, Books borrowed: {' '.join(booksCombined)}"
     
     def addBook(self, book):
         self.borrowedBooks.append(book)
+    
+    def removeBook(self, book):
+        self.borrowedBooks.remove(book)
 
 class Library:
     def __init__(self):
-        self.books = []
+        self.books= []
         self.membersList = []
 
     def addMember(self, name):
@@ -73,7 +76,7 @@ class Library:
             if mem.name == name:
                 exists = True
                 return exists
-            return exists
+        return exists
 
     # Call this function to check if a book exists
     # Returns false if the book is not in the books list
@@ -84,7 +87,7 @@ class Library:
             if bk.title == book:
                 exists = True
                 return exists
-            return exists
+        return exists
 
     def removeMember(self, name):
         if self.checkMember(name) == True:
@@ -103,9 +106,6 @@ class Library:
 # changed the name of the function to addBook from add_book
 # Added a parameter to the function to accept the book object
     def addBook(self, title, author, pubYear):
-        title = input("Enter the book title: ")
-        author = input("Enter the author's name: ")
-        pubYear = input("Enter the publication year: ")
         if self.searchBook(title) != None:
             print("Book already exists")
             return
@@ -115,17 +115,15 @@ class Library:
         print(f"Book {title} added!")
 
     def removeBook(self, title):
-        title = input("Enter the title of the book to remove: ")
         # changed the name of the variable to bookFound from book_found
         bookFound = False
-        for index, book in enumerate(booksList):
-            if book.title == title:
-                del booksList[index]
+        for index, book in enumerate(self.books):
+            if book.title == title and book.borrower is None:
+                del self.books[index]
                 print(f"Book {title} removed!")
                 bookFound = True
-                break
         if not bookFound:
-            print("Book does not exist!")
+            print("Book not found or is borrowed!")
 
     def borrowBook(self, book, member):
         if self.checkBook(book) == False:
@@ -136,16 +134,16 @@ class Library:
             return
         
         for bk in self.books:
-            if bk.isBorrowed():
-                print("Book is already borrowed")
-                return
-            else:
+            if bk.title == book and bk.borrower is None:
                 mem = self.searchMember(member)
-                bk.Borrower = mem
+                bk.borrower = mem
                 mem.addBook(bk)
-                bk.setDueDate(datetime.date.today(0) + datetime.timedelta(days=14))
+                bk.setDueDate(datetime.date.today() + datetime.timedelta(days=14))
                 print(mem.name + "Book borrowed: " + bk.__str__())
                 print("Due date: " + bk.dueDate.__str__() + "\n")
+                return
+        print("Book not found")
+
 
     def returnBook(self, book, member):
         if self.checkBook(book) == False:
@@ -157,16 +155,16 @@ class Library:
         
         mem = self.searchMember(member)
         bk = self.searchBook(book)
-        if bk.isBorrowed() and bk.Borrower.name == mem.name:
-            bk.Borrower = None
+        if bk is not None and bk.borrower is not None and bk.borrower.name == mem.name:
+            bk.borrower = None
             mem.removeBook(bk)
             print("Book returned:" + bk.__str__())
         else:
             print("Book is not borrowed by " + mem.name)
             
-    def listAllBooks():
-        print("Books in library:" + str(len(booksList)))
-        for book in booksList:
+    def listAllBooks(self):
+        print("Books in library:" + str(len(self.books)))
+        for book in self.books:
             print(book.__str__())
 
     # Added a function to list all members
@@ -188,17 +186,11 @@ class Library:
             if bk.title == book:
                 return bk      
         print("No book found for " + book) 
+        return None
 
-    def updateBook():
-        title = input("Enter the title of the book to update: ")
-        for book in booksList:
+    def updateBook(self, title, newTitle, newAuthor, newPubYear):
+        for book in self.books:
             if book.title == title:
-                # changed the name of the variable to newTitle from new_title
-                newTitle = input("Enter the new title: ")
-                # changed the name of the variable to newAuthor from new_author
-                newAuthor = input("Enter the new author's name: ")
-                # changed the name of the variable to newPubYear from new_pubYear
-                newPubYear = input("Enter the new publication year: ")
                 book.title = newTitle if newTitle else book.title
                 book.author = newAuthor if newAuthor else book.author
                 book.pubYear = newPubYear if newPubYear else book.pubYear
@@ -308,3 +300,8 @@ while isRunning:
         print("12. Search for a member")
         print("13. Display menu")
         print("14. Exit")
+    elif choice == 14:
+        isRunning = False
+        print("Goodbye!")
+    else:
+        print("Invalid input")
