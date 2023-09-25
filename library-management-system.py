@@ -1,78 +1,87 @@
 # Added a datetime modulebookslist
+# Taken from https://www.w3schools.com/python/python_datetime.asp
 import datetime
-
 
 # User prompt to input number, returns the integer
 # or the value entered and prints an error message if the input
-# is not a number.
-def inputNumber():
-    Num = input()
-    while not Num.isdigit():
+# is not a number or is invalid.
+def input_number():
+    num = input()
+    while not num.isdigit():
         print("Invalid input. Please enter a number.")
-        Num = input()
-    return int(Num)
+        num = input()
+    return int(num)
 
 # Asks user for a string which can be a
 # member name or a book name
-def inputString():
+def input_string():
     return input()
 
-
-class Book:
-    # Changed pubYear to pubDate
-    def __init__(self, title, author, pubDate):
+# The Book class will inherit from the LibraryItem parent class
+class Book():
+    # Changed pubYear to pub_date
+    def __init__(self, title, author, pub_date):
+        # Added a constructor of the LibraryItem parent class
         self.title = title
         self.author = author
-        self.pubDate = pubDate
+        self.pub_date = pub_date
         # added a borrower and due date attribute and initialising them to None.
         self.borrower = None
-        self.dueDate = None
+        self.due_date = None
     
-    def __str__(self):
-        return "Title:" f"{self.title} by {self.author} (Published in {self.pubDate})"
+    def display_info(self):
+        return f"Title: {self.title} by {self.author} (Published in {self.pub_date})"
 
-    def isBorrowed(self):
+    def __str__(self):
+        return "Title:" f"{self.title} by {self.author} (Published in {self.pub_date})"
+
+    def is_borrowed(self):
         return self.borrower is not None
     
-    def setDueDate(self, dueDate):
-        self.dueDate = dueDate
+    def set_due_date(self, due_date):
+        self.due_date = due_date
 
-
-class Member:
+# # The Member class will inherit from the LibraryItem parent class
+class Member():
     def __init__(self, name):
-        self.name = name
-        self.borrowedBooks = []
+        self.name= name
+        self.borrowed_books = []
 
+    def display_info(self):
+        borrowed_books_info = ', '.join(book.title for book in self.borrowed_books)
+        return f"Name: {self.title}, Books borrowed: {borrowed_books_info}"
+    
     def __str__(self):
-        booksCombined = []
-        for i in self.borrowedBooks:
-            booksCombined.append(i.__str__())
+        books_combined = []
+        for i in self.borrowed_books:
+            books_combined.append(i.__str__())
         
-        return "Name: " f"{self.name}, Books borrowed: {' '.join(booksCombined)}"
+        return "Name: " f"{self.name}, Books borrowed: {' '.join(books_combined)}"
     
-    def addBook(self, book):
-        self.borrowedBooks.append(book)
+    def add_book(self, book):
+        self.borrowed_books.append(book)
     
-    def removeBook(self, book):
-        self.borrowedBooks.remove(book)
+    def remove_book(self, book):
+        self.borrowed_books.remove(book)
 
+# A Library class to store books and members
 class Library:
     def __init__(self):
-        self.books= []
-        self.membersList = []
+        self.books = []
+        self.members_list = []
 
-    def addMember(self, name):
-        if self.checkMember(name) == False:
-            self.membersList.append(Member(name))
+    def add_member(self, name):
+        if not self.check_member(name):
+            self.members_list.append(Member(name))
         else:
             print("Member already exists")
 
     # Call this function to check if a member exists
     # Returns false if the member is not in the 
     # membersList and true if otherwise
-    def checkMember(self, name):
+    def check_member(self, name):
         exists = False
-        for mem in self.membersList:
+        for mem in self.members_list:
             if mem.name == name:
                 exists = True
                 return exists
@@ -81,7 +90,7 @@ class Library:
     # Call this function to check if a book exists
     # Returns false if the book is not in the books list
     # and true if otherwise
-    def checkBook(self, book):
+    def check_book(self, book):
         exists = False
         for bk in self.books:
             if bk.title == book:
@@ -89,123 +98,192 @@ class Library:
                 return exists
         return exists
 
-    def removeMember(self, name):
-        if self.checkMember(name) == True:
+    def remove_member(self, name):
+        if self.check_member(name):
 
-            for mem in self.membersList:
+            for mem in self.members_list:
                 if mem.name == name:
-                    if len(mem.borrowedBooks) > 0:
+                    if len(mem.borrowed_books) > 0:
                         print("Member has borrowed books. Cannot remove member")
                         return
-                    self.membersList.remove(mem)
+                    self.members_list.remove(mem)
                     print("Member removed: " + mem.__str__())
                     return
         else:
             print("Member does not exist")
 
-# changed the name of the function to addBook from add_book
 # Added a parameter to the function to accept the book object
-    def addBook(self, title, author, pubYear):
-        if self.searchBook(title) != None:
-            print("Book already exists")
+    def add_book(self, title, author, pub_year):
+        if not self.search_book(title):
+            new_book = Book(title, author, pub_year)
+            self.books.append(new_book)
+            print(f"Book {title} added!")
             return
-        # changed the name of the variable to newBook from new_book
-        newBook = Book(title, author, pubYear)
-        self.books.append(newBook)
-        print(f"Book {title} added!")
+        else:
+            print("Book already exists")
+            
+        
 
-    def removeBook(self, title):
-        # changed the name of the variable to bookFound from book_found
-        bookFound = False
+    def remove_book(self, title):
+        book_found = False
         for index, book in enumerate(self.books):
             if book.title == title and book.borrower is None:
                 del self.books[index]
                 print(f"Book {title} removed!")
-                bookFound = True
-        if not bookFound:
+                book_found = True
+        if not book_found:
             print("Book not found or is borrowed!")
 
-    def borrowBook(self, book, member):
-        if self.checkBook(book) == False:
+    def borrowed_book(self, book, member):
+        if not self.check_book(book):
             print("Book does not exist")
             return
-        elif self.checkMember(member) == False:
-            print("Member does no exist")
+        elif not self.check_member(member):
+            print("Member does not exist")
             return
         
+        # Generated from Chat-GPT
         for bk in self.books:
             if bk.title == book and bk.borrower is None:
-                mem = self.searchMember(member)
+                mem = self.search_member(member)
                 bk.borrower = mem
-                mem.addBook(bk)
-                bk.setDueDate(datetime.date.today() + datetime.timedelta(days=14))
-                print(mem.name + "Book borrowed: " + bk.__str__())
-                print("Due date: " + bk.dueDate.__str__() + "\n")
-                return
+                mem.add_book(bk)
+                due_date = datetime.date.today() + datetime.timedelta(days=14)
+                bk.set_due_date(due_date)
+                print(mem.name + " Book borrowed: " + bk.__str__())
+                print("Due date: " + bk.due_date.__str__() + "\n")
+                return  
         print("Book not found")
 
 
-    def returnBook(self, book, member):
-        if self.checkBook(book) == False:
+    def return_book(self, book, member):
+        if not self.check_book(book):
             print("Book does not exist")
             return
-        elif self.checkMember(member) == False:
-            print("Member does no exist")
+        elif not self.check_member(member):
+            print("Member does not exist")
             return
         
-        mem = self.searchMember(member)
-        bk = self.searchBook(book)
+        mem = self.search_member(member)
+        bk = self.search_book(book)
         if bk is not None and bk.borrower is not None and bk.borrower.name == mem.name:
             bk.borrower = None
-            mem.removeBook(bk)
+            mem.remove_book(bk)
             print("Book returned:" + bk.__str__())
         else:
             print("Book is not borrowed by " + mem.name)
             
-    def listAllBooks(self):
+    def list_all_books(self):
         print("Books in library:" + str(len(self.books)))
         for book in self.books:
             print(book.__str__())
 
     # Added a function to list all members
-    def listAllMembers(self):
-        print("Count of Members in Library: " + str(len(self.membersList)))
-        for mem in self.membersList:
+    def list_all_members(self):
+        print("Count of Members in Library: " + str(len(self.members_list)))
+        for mem in self.members_list:
             print(mem.__str__())
 
    # Added a function to search for the name of a member
-    def searchMember(self, member):
-        for mem in self.membersList:
+    def search_member(self, member):
+        for mem in self.members_list:
             if mem.name == member:
                 return mem
         print("No member found for " + member)
 
     # Added a function to search for a book        
-    def searchBook(self, book):
+    def search_book(self, book):
         for bk in self.books:
             if bk.title == book:
                 return bk      
         print("No book found for " + book) 
         return None
 
-    def updateBook(self, title, newTitle, newAuthor, newPubYear):
+    def update_book(self, title, new_title, new_author, new_pub_year):
         for book in self.books:
             if book.title == title:
-                book.title = newTitle if newTitle else book.title
-                book.author = newAuthor if newAuthor else book.author
-                book.pubYear = newPubYear if newPubYear else book.pubYear
+                book.title = new_title if new_title else book.title
+                book.author = new_author if new_author else book.author
+                book.pub_year = new_pub_year if new_pub_year else book.pub_year
                 print(f"Book {title} updated!")
                 return
         print("Book not found!")
 
     # Added a function to check for overdue books
-    def checkOverDueBooks(self):
+    def check_overdue_books(self):
         print("Overdue books: ")
         for book in self.books:
-            if book.dueDate < datetime.date.today():
+            if book.due_date < datetime.date.today():
                 print(book.title)
-# while True:
-# TODO: Add a menu for the user to interact with
+
+class LibraryConsole:
+    def __init__(self, library):
+        self.library = library
+
+    def start(self):
+        print("Welcome to the library")
+        while True:
+            print("1. Add a member")
+            print("2. Remove a member")
+            print("3. Add a book")
+            print("4. Remove a book")
+            print("5. Borrow a book")
+            print("6. Return a book")
+            print("7. List members")
+            print("8. List books")
+            print("9. Update a book")
+            print("10. Check overdue books")
+            print("11. Search for a book")
+            print("12. Search for a member")
+            print("13. Display menu")
+            print("14. Exit")
+
+            choice = input_number()
+
+            if choice == 1:
+                name = input_string()
+                self.library.add_member(name)
+            # Add similar logic for other menu choices
+            elif choice == 13:
+                self.display_menu()
+            elif choice == 14:
+                print("Goodbye!")
+                break
+            else:
+                print("Invalid input")
+
+    def display_menu(self):
+        # Print the menu without asking for input
+        print("1. Add a member")
+        print("2. Remove a member")
+        print("3. Add a book")
+        print("4. Remove a book")
+        print("5. Borrow a book")
+        print("6. Return a book")
+        print("7. List members")
+        print("8. List books")
+        print("9. Update a book")
+        print("10. Check overdue books")
+        print("11. Search for a book")
+        print("12. Search for a member")
+        print("13. Display menu")
+        print("14. Exit")
+
+def input_number():
+    num = input()
+    while not num.isdigit():
+        print("Invalid input. Please enter a number.")
+        num = input()
+    return int(num)
+
+def input_string():
+    return input()
+
+def main():
+    # Create an instance of the Library class
+    library = Library()
+
+# Added a menu for the user to interact with
 print("Welcome to the library")
 print("1. Add a member")
 print("2. Remove a member")
@@ -222,67 +300,68 @@ print("12. Search for a member")
 print("13. Display menu")
 print("14. Exit")
 lib = Library()       
+
 isRunning = True
 while isRunning:
     print("Enter your choice: ")
-    choice = inputNumber()
+    choice = input_number()
 
     if choice == 1:
         print("Enter member name to add: ")
-        name = inputString()
-        lib.addMember(name)
+        name = input_string()
+        lib.add_member(name)
     elif choice == 2:
         print("Enter member name to remove: ")
-        name = inputString()
-        lib.removeMember(name)
+        name = input_string()
+        lib.remove_member(name)
     elif choice == 3:
         print("Enter book title to add: ")
-        title = inputString()
+        title = input_string()
         print("Enter book author: ")
-        author = inputString()
+        author = input_string()
         print("Enter book publication year: ")
-        pubYear = inputNumber()
-        lib.addBook(title, author, pubYear)
+        pub_year = input_number()
+        lib.add_book(title, author, pub_year)
     elif choice == 4:
         print("Enter book title to remove: ")
-        title = inputString()
-        lib.removeBook(title)
+        title = input_string()
+        lib.remove_book(title)
     elif choice == 5:
         print("Enter book title to borrow: ")
-        book = inputString()
+        book = input_string()
         print("Enter member name to borrow: ")
-        member = inputString()
-        lib.borrowBook(book, member)
+        member = input_string()
+        lib.borrowed_book(book, member)
     elif choice == 6:
         print("Enter book title to return: ")
-        book = inputString()
+        book = input_string()
         print("Enter member name to return: ")
-        member = inputString()
-        lib.returnBook(book, member)
+        member = input_string()
+        lib.return_book(book, member)
     elif choice == 7:
-        lib.listAllMembers()
+        lib.list_all_members()
     elif choice == 8:
-        lib.listAllBooks()
+        lib.list_all_books()
     elif choice == 9:
         print("Enter book title to update: ")
-        title = inputString()
+        title = input_string()
         print("Enter new book title:")
-        newTitle = inputString()
+        new_title = input_string()
         print("Enter new book author: ")
-        newAuthor = inputString()
+        new_author = input_string()
         print("Enter new book publication year: ")
-        newPubYear = inputNumber()
-        lib.updateBook(title, newTitle, newAuthor, newPubYear)
+        new_pub_year = input_number()
+        lib.update_book(title, new_title, new_author, new_pub_year)
     elif choice == 10:
-        Library.checkOverDueBooks()
+        lib.check_overdue_books()
     elif choice == 11:
         print("Enter book title to search: ")
-        title = inputString()
-        lib.searchBook(title)
+        title = input_string()
+        lib.search_book(title)
     elif choice == 12:
         print("Enter member name to search: ")
-        name = inputString()
-        lib.searchMember(name)
+        name = input_string()
+        lib.search_member(name)
 
 
     elif choice == 13:
