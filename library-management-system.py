@@ -5,6 +5,9 @@ import datetime
 # User prompt to input number, returns the integer
 # or the value entered and prints an error message if the input
 # is not a number or is invalid.
+
+# While not loop taken from https://www.w3schools.com/python/python_while_loops.asp
+# Can also use a try and except block to catch the error value error
 def input_number():
     num = input()
     while not num.isdigit():
@@ -14,6 +17,7 @@ def input_number():
 
 # Asks user for a string which can be a
 # member name or a book name
+# How to use an input function taken form https://www.geeksforgeeks.org/python-input-function/
 def input_string():
     return input()
 
@@ -41,12 +45,13 @@ class Book():
     def set_due_date(self, due_date):
         self.due_date = due_date
 
-# # The Member class will inherit from the LibraryItem parent class
+# The Member class will inherit from the LibraryItem parent class
 class Member():
     def __init__(self, name):
         self.name= name
         self.borrowed_books = []
 
+    # Taken from https://www.geeksforgeeks.org/python-program-to-convert-a-list-to-string/
     def display_info(self):
         borrowed_books_info = ', '.join(book.title for book in self.borrowed_books)
         return f"Name: {self.title}, Books borrowed: {borrowed_books_info}"
@@ -58,6 +63,7 @@ class Member():
         
         return "Name: " f"{self.name}, Books borrowed: {' '.join(books_combined)}"
     
+    # Taken from https://www.w3schools.com/python/ref_list_append.asp
     def add_book(self, book):
         self.borrowed_books.append(book)
     
@@ -103,6 +109,8 @@ class Library:
 
             for mem in self.members_list:
                 if mem.name == name:
+                    # If member has a book borrowed, do not remove member
+                    # Taken from https://www.w3schools.com/python/ref_func_len.asp
                     if len(mem.borrowed_books) > 0:
                         print("Member has borrowed books. Cannot remove member")
                         return
@@ -142,7 +150,7 @@ class Library:
             print("Member does not exist")
             return
         
-        # Generated from Chat-GPT
+        # Generated from Github Copilot
         for bk in self.books:
             if bk.title == book and bk.borrower is None:
                 mem = self.search_member(member)
@@ -243,7 +251,7 @@ class LibraryConsole:
             if choice == 1:
                 name = input_string()
                 self.library.add_member(name)
-            # Add similar logic for other menu choices
+
             elif choice == 13:
                 self.display_menu()
             elif choice == 14:
